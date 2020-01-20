@@ -274,7 +274,7 @@ private:
   //every time point in char.inis times this equals the final time
   const int time_mod = 40;
 
-  static const int chatmessage_size = 16;
+  static const int chatmessage_size = 23;
   QString m_chatmessage[chatmessage_size];
   bool chatmessage_is_empty = false;
 
@@ -378,6 +378,7 @@ private:
   AOScene *ui_vp_background;
   AOMovie *ui_vp_speedlines;
   AOCharMovie *ui_vp_player_char;
+  AOCharMovie *ui_vp_sideplayer_char;
   AOScene *ui_vp_desk;
   AOScene *ui_vp_legacy_desk;
   AOEvidenceDisplay *ui_vp_evidence_display;

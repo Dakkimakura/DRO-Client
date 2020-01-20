@@ -70,6 +70,8 @@ Courtroom::Courtroom(AOApplication *p_ao_app) : QMainWindow()
   ui_vp_speedlines = new AOMovie(ui_viewport, ao_app);
   ui_vp_speedlines->set_play_once(false);
   ui_vp_player_char = new AOCharMovie(ui_viewport, ao_app);
+  ui_vp_sideplayer_char = new AOCharMovie(ui_viewport, ao_app);
+  ui_vp_sideplayer_char->hide();
   ui_vp_desk = new AOScene(ui_viewport, ao_app);
   ui_vp_legacy_desk = new AOScene(ui_viewport, ao_app);
 
@@ -480,6 +482,9 @@ void Courtroom::set_widgets()
 
   ui_vp_player_char->move(0, 0);
   ui_vp_player_char->combo_resize(ui_viewport->width(), ui_viewport->height());
+
+  ui_vp_sideplayer_char->move(0, 0);
+  ui_vp_sideplayer_char->combo_resize(ui_viewport->width(), ui_viewport->height());
 
   //the AO2 desk element
   ui_vp_desk->move(0, 0);
@@ -1981,7 +1986,6 @@ void Courtroom::handle_chatmessage_2() // handles IC
   else
     ui_vp_player_char->set_flipped(false);
 
-
   switch (emote_mod)
   {
   case 1: case 2: case 6:
@@ -1992,6 +1996,62 @@ void Courtroom::handle_chatmessage_2() // handles IC
     //intentional fallthru
   case 0: case 5:
     handle_chatmessage_3();
+  }
+
+  if (m_chatmessage[OTHER_CHARID].isEmpty())
+  {
+    // If there is no second character, hide 'em, and center the first.
+    ui_vp_sideplayer_char->hide();
+    ui_vp_sideplayer_char->move(0,0);
+
+    ui_vp_player_char->move(0,0);
+  }
+  else
+  {
+      bool ok;
+      int got_other_charid = m_chatmessage[OTHER_CHARID].toInt(&ok);
+      if (ok && got_other_charid > -1)
+      {
+          // In every other case, the person more to the left is on top.
+          // These cases also don't move the characters down.
+          int hor_offset = m_chatmessage[SELF_OFFSET].toInt();
+          ui_vp_player_char->move(ui_viewport->width() * hor_offset / 100, 0);
+
+          // We do the same with the second character.
+          int hor2_offset = m_chatmessage[OTHER_OFFSET].toInt();
+          ui_vp_sideplayer_char->move(ui_viewport->width() * hor2_offset / 100, 0);
+
+          // Finally, we reorder them based on who is more to the left.
+          // The person more to the left is more in the front.
+          if (hor2_offset >= hor_offset)
+          {
+            ui_vp_sideplayer_char->raise();
+            ui_vp_player_char->raise();
+          }
+          else
+          {
+            ui_vp_player_char->raise();
+            ui_vp_sideplayer_char->raise();
+          }
+          ui_vp_desk->raise();
+          ui_vp_legacy_desk->raise();
+
+        // We should probably also play the other character's idle emote.
+        if (ao_app->flipping_enabled && m_chatmessage[OTHER_FLIP].toInt() == 1)
+          ui_vp_sideplayer_char->set_flipped(true);
+        else
+          ui_vp_sideplayer_char->set_flipped(false);
+        ui_vp_sideplayer_char->play_idle(m_chatmessage[OTHER_NAME], m_chatmessage[OTHER_EMOTE], true);
+      }
+      else
+      {
+          // If the server understands other characters, but there
+          // really is no second character, hide 'em, and center the first.
+          ui_vp_sideplayer_char->hide();
+          ui_vp_sideplayer_char->move(0,0);
+
+          ui_vp_player_char->move(0,0);
+      }
   }
 }
 
@@ -2065,7 +2125,6 @@ void Courtroom::handle_chatmessage_3()
     ui_vp_showname->show();
     ui_vp_showname_image->hide();
   }
-
 
   switch (f_anim_state)
   {

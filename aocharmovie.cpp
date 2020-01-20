@@ -170,6 +170,11 @@ void AOCharMovie::stop()
   this->hide();
 }
 
+void AOCharMovie::move(int ax, int ay)
+{
+  QLabel::move(ax, ay);
+}
+
 void AOCharMovie::combo_resize(int w, int h)
 {
   QSize f_size(w, h);
