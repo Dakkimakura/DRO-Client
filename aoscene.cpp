@@ -94,3 +94,54 @@ void AOScene::set_legacy_desk(QString p_image)
   this->resize(vp_width, final_h);
   this->setPixmap(f_desk.scaled(vp_width, final_h));
 }
+
+void AOScene::set_cropped_image(QString p_image, int x, int y, int width, int height)
+{
+  QString animated_background_path = ao_app->get_background_path() + p_image;
+  QString background_path = ao_app->get_background_path() + p_image + ".png";
+  QString default_path = ao_app->get_default_background_path() + p_image;
+
+  for (auto& ext : QVector<QString>{".apng", ".gif"})
+  {
+    QString full_path = animated_background_path + ext;
+    if (file_exists(full_path))
+    {
+      animated_background_path = full_path;
+      break;
+    }
+  }
+
+  QPixmap animated_background(animated_background_path);
+  QPixmap background(background_path);
+  QPixmap default_bg(default_path);
+
+  int w = this->width();
+  int h = this->height();
+
+  // remove movie
+  this->clear();
+  this->setMovie(nullptr);
+  // stop current movie
+  m_movie->stop();
+  m_movie->setFileName(animated_background_path);
+  m_movie->setScaledSize(QSize(w/2, h));
+
+  if (m_movie->isValid())
+  {
+    this->setMovie(m_movie);
+    m_movie->start();
+    qDebug() << "isValid";
+  }
+  else if (file_exists(background_path))
+  {
+    QRect rect(x, y, width, height);
+    QPixmap croppedBackground = background.copy(rect);
+    qDebug() << "background";
+    this->setPixmap(croppedBackground);//.scaled(w, h));
+  }
+  else
+  {
+    qDebug() << "defaultbackground";
+    this->setPixmap(default_bg.scaled(w, h));
+  }
+}

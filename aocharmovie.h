@@ -23,6 +23,8 @@ public:
 
   void stop();
 
+  void move(int ax, int ay);
+
   void combo_resize(int w, int h);
 
 private:

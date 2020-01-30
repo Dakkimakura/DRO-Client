@@ -375,8 +375,11 @@ private:
   AOImage *ui_background;
 
   QWidget *ui_viewport;
+  QVector<QWidget> *ui_viewports;
   AOScene *ui_vp_background;
+  QVector<AOScene> *ui_vp_backgrounds;
   AOMovie *ui_vp_speedlines;
+  QVector<AOCharMovie> *ui_vp_player_chars;
   AOCharMovie *ui_vp_player_char;
   AOScene *ui_vp_desk;
   AOScene *ui_vp_legacy_desk;
