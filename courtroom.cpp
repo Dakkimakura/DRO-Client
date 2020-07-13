@@ -213,7 +213,8 @@ void Courtroom::done_received()
 
   set_char_select();
 
-  show();
+  showFullScreen();
+  //show();
 
   ui_spectator->show();
 }
