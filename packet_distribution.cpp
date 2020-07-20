@@ -663,6 +663,9 @@ void AOApplication::server_packet_received(AOPacket *p_packet)
   }
   else if (header == "CL")
   {
+    if (!courtroom_constructed)
+      goto end;
+
     w_courtroom->handle_clock(f_contents.at(1));
   }
   else if (header == "VA")
@@ -675,6 +678,8 @@ void AOApplication::server_packet_received(AOPacket *p_packet)
   else if (header == "TR")
   {
     // Timer resume
+    if (!courtroom_constructed)
+      goto end;
     if (f_contents.size() != 1)
       goto end;
 
@@ -685,6 +690,8 @@ void AOApplication::server_packet_received(AOPacket *p_packet)
   else if (header == "TST")
   {
     // Timer set time
+    if (!courtroom_constructed)
+      goto end;
     if (f_contents.size() != 2)
       goto end;
 
@@ -695,6 +702,8 @@ void AOApplication::server_packet_received(AOPacket *p_packet)
   else if (header == "TSS")
   {
     // Timer set timeStep length
+    if (!courtroom_constructed)
+      goto end;
     if (f_contents.size() != 2)
       goto end;
 
@@ -705,6 +714,8 @@ void AOApplication::server_packet_received(AOPacket *p_packet)
   else if (header == "TSF")
   {
     // Timer set Firing interval
+    if (!courtroom_constructed)
+      goto end;
     if (f_contents.size() != 2)
       goto end;
 
@@ -715,6 +726,8 @@ void AOApplication::server_packet_received(AOPacket *p_packet)
   else if (header == "TP")
   {
     // Timer pause
+    if (!courtroom_constructed)
+      goto end;
     if (f_contents.size() != 1)
       goto end;
 
