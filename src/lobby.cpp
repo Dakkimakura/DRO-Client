@@ -497,3 +497,11 @@ void Lobby::set_player_count(int players_online, int max_players)
   ui_description->append(f_last_server.desc);
   ui_description->ensureCursorVisible();
 }
+
+void Lobby::resizeEvent(QResizeEvent *event)
+{
+  // call_notice("Event");
+  QMainWindow::resizeEvent(event);
+  for (QWidget *children : findChildren<QWidget *>())
+    ao_app->recursive_resize(event, children);
+}

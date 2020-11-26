@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QResizeEvent>
 #include <QVector>
 
 class NetworkManager;
@@ -413,6 +414,8 @@ public:
 
   // Returns p_char's gender
   QString get_gender(QString p_char);
+
+  void recursive_resize(QResizeEvent *, QWidget *);
 
 signals:
   void reload_theme();

@@ -17,6 +17,10 @@ public:
   void set_size_and_pos(QString identifier);
 
   AOApplication *ao_app = nullptr;
+
+  using QLabel::resizeEvent;
+  virtual void resizeEvent(QResizeEvent *);
+
   QString image_path;
 };
 

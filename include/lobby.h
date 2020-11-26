@@ -51,6 +51,9 @@ public:
 
   bool public_servers_selected = true;
 
+  using QMainWindow::resizeEvent;
+  virtual void resizeEvent(QResizeEvent *);
+
 private:
   AOApplication *ao_app = nullptr;
 
