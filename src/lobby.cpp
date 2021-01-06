@@ -104,6 +104,11 @@ void Lobby::set_widgets()
     this->resize(f_lobby.width, f_lobby.height);
   }
 
+  this->setProperty("theme_x", 0);
+  this->setProperty("theme_y", 0);
+  this->setProperty("theme_width", this->width());
+  this->setProperty("theme_height", this->height());
+
   set_size_and_pos(ui_background, "lobby");
   ui_background->set_image("lobbybackground.png");
 
@@ -195,6 +200,10 @@ void Lobby::set_size_and_pos(QWidget *p_widget, QString p_identifier)
   {
     p_widget->move(design_ini_result.x, design_ini_result.y);
     p_widget->resize(design_ini_result.width, design_ini_result.height);
+    p_widget->setProperty("theme_x", design_ini_result.x);
+    p_widget->setProperty("theme_y", design_ini_result.y);
+    p_widget->setProperty("theme_width", design_ini_result.width);
+    p_widget->setProperty("theme_height", design_ini_result.height);
   }
 }
 
@@ -500,8 +509,10 @@ void Lobby::set_player_count(int players_online, int max_players)
 
 void Lobby::resizeEvent(QResizeEvent *event)
 {
-  // call_notice("Event");
   QMainWindow::resizeEvent(event);
+  QSize original_size(this->property("theme_width").toInt(),
+                      this->property("theme_height").toInt());
+
   for (QWidget *children : findChildren<QWidget *>())
-    ao_app->recursive_resize(event, children);
+    ao_app->recursive_resize(event, children, original_size);
 }

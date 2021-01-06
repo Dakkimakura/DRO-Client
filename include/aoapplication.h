@@ -415,7 +415,7 @@ public:
   // Returns p_char's gender
   QString get_gender(QString p_char);
 
-  void recursive_resize(QResizeEvent *, QWidget *);
+  void recursive_resize(QResizeEvent *, QWidget *, QSize);
 
 signals:
   void reload_theme();

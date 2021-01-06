@@ -4,22 +4,25 @@
 
 #include <QDebug>
 
-AOImageDisplay::AOImageDisplay(QWidget *parent, AOApplication *p_ao_app) : QLabel(parent)
+AOImageDisplay::AOImageDisplay(QWidget *parent, AOApplication *p_ao_app)
+    : QLabel(parent)
 {
   ao_app = p_ao_app;
 }
 
+AOImageDisplay::~AOImageDisplay(){};
+
 void AOImageDisplay::set_image(QString p_image)
 {
   QString f_path = ao_app->find_theme_asset_path(p_image);
-  AOPixmap f_pixmap(f_path);
-  this->setPixmap(f_pixmap.scale(size()));
 
   // Store final path if the path exists
   if (file_exists(f_path))
     image_path = f_path;
   else
     image_path = "";
+
+  refresh();
 }
 
 void AOImageDisplay::set_image_from_path(QString p_path)
@@ -41,4 +44,17 @@ void AOImageDisplay::set_image_from_path(QString p_path)
     image_path = final_path;
   else
     image_path = "";
+
+  refresh();
+}
+
+void AOImageDisplay::refresh()
+{
+  AOPixmap f_pixmap(image_path);
+  this->setPixmap(f_pixmap.scale(size()));
+}
+
+void AOImageDisplay::resizeEvent(QResizeEvent *event)
+{
+  refresh();
 }

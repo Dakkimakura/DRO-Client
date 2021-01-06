@@ -307,29 +307,27 @@ void AOApplication::on_courtroom_destroyed()
   config_panel->hide();
 }
 
-void AOApplication::recursive_resize(QResizeEvent *event, QWidget *widget)
+void AOApplication::recursive_resize(QResizeEvent *event, QWidget *widget,
+                                     QSize original_ratio)
 {
-  // call_notice("Started recursive resize");
   QSize old_size = event->oldSize();
   QSize new_size = event->size();
+  int theme_x = widget->property("theme_x").toInt();
+  int theme_y = widget->property("theme_y").toInt();
+  int theme_width = widget->property("theme_width").toInt();
+  int theme_height = widget->property("theme_height").toInt();
   if (old_size.height() <= 0 || old_size.width() <= 0)
     return;
   if (new_size.height() <= 0 || new_size.width() <= 0)
     return;
+  if (theme_x < 0 || theme_y < 0 || theme_width <= 0 || theme_height <= 0)
+    return;
+  float y_ratio = new_size.height() / (float)original_ratio.height();
+  float x_ratio = new_size.width() / (float)original_ratio.width();
 
-  float y_ratio = new_size.height() / (float)old_size.height();
-  float x_ratio = new_size.width() / (float)old_size.width();
-
-  // call_notice("About to move and resize");
-  // call_notice(QString::number(widget->x() * x_ratio));
-  // call_notice(QString::number(widget->y() * y_ratio));
-  // call_notice(QString::number(widget->width() * x_ratio));
-  // call_notice(QString::number(widget->height() * y_ratio));
-
-  widget->move(widget->x() * x_ratio, widget->y() * y_ratio);
-  widget->resize(widget->width() * x_ratio, widget->height() * y_ratio);
+  widget->move(theme_x * x_ratio, theme_y * y_ratio);
+  widget->resize(theme_width * x_ratio, theme_height * y_ratio);
 
   for (QWidget *child : widget->findChildren<QWidget *>())
-    recursive_resize(event, child);
-  // call_notice("Done moving and resizing");
+    recursive_resize(event, child, original_ratio);
 }
