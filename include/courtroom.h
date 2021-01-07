@@ -53,6 +53,9 @@ class Courtroom : public QMainWindow
 public:
   explicit Courtroom(AOApplication *p_ao_app);
 
+  using QMainWindow::resizeEvent;
+  void resizeEvent(QResizeEvent *) override;
+
   void append_char(char_type p_char)
   {
     char_list.append(p_char);

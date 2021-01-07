@@ -594,9 +594,19 @@ void Courtroom::set_widgets()
     this->resize(f_courtroom.width, f_courtroom.height);
   }
 
+  this->setProperty("theme_x", 0);
+  this->setProperty("theme_y", 0);
+  this->setProperty("theme_width", this->width());
+  this->setProperty("theme_height", this->height());
+
   ui_background->move(0, 0);
   ui_background->resize(m_courtroom_width, m_courtroom_height);
   ui_background->set_image("courtroombackground.png");
+
+  ui_background->setProperty("theme_x", 0);
+  ui_background->setProperty("theme_y", 0);
+  ui_background->setProperty("theme_width", this->width());
+  ui_background->setProperty("theme_height", this->height());
 
   set_size_and_pos(ui_viewport, "viewport");
 
@@ -1048,6 +1058,10 @@ void Courtroom::set_size_and_pos(QWidget *p_widget, QString p_identifier)
   {
     p_widget->move(design_ini_result.x, design_ini_result.y);
     p_widget->resize(design_ini_result.width, design_ini_result.height);
+    p_widget->setProperty("theme_x", design_ini_result.x);
+    p_widget->setProperty("theme_y", design_ini_result.y);
+    p_widget->setProperty("theme_width", design_ini_result.width);
+    p_widget->setProperty("theme_height", design_ini_result.height);
   }
 }
 

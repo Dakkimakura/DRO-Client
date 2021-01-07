@@ -23,6 +23,9 @@ class Lobby : public QMainWindow
 public:
   Lobby(AOApplication *p_ao_app);
 
+  using QMainWindow::resizeEvent;
+  virtual void resizeEvent(QResizeEvent *);
+
   void set_widgets();
   void list_servers();
   void list_favorites();
@@ -50,9 +53,6 @@ public:
   void set_loading_value(int p_value);
 
   bool public_servers_selected = true;
-
-  using QMainWindow::resizeEvent;
-  virtual void resizeEvent(QResizeEvent *);
 
 private:
   AOApplication *ao_app = nullptr;

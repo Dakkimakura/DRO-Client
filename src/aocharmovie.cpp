@@ -139,10 +139,6 @@ void AOCharMovie::stop()
 void AOCharMovie::combo_resize(QSize p_size)
 {
   resize(p_size);
-  m_reader->stop();
-  m_frame_timer->stop();
-  m_reader->setScaledSize(p_size);
-  m_reader->start();
 }
 
 void AOCharMovie::on_frame_changed(int p_frame_num)
@@ -171,4 +167,13 @@ void AOCharMovie::on_frame_changed(int p_frame_num)
 void AOCharMovie::timer_done()
 {
   done();
+}
+
+void AOCharMovie::resizeEvent(QResizeEvent *event)
+{
+  QSize p_size = event->size();
+  m_reader->stop();
+  m_frame_timer->stop();
+  m_reader->setScaledSize(p_size);
+  m_reader->start();
 }

@@ -316,6 +316,8 @@ void AOApplication::recursive_resize(QResizeEvent *event, QWidget *widget,
   int theme_y = widget->property("theme_y").toInt();
   int theme_width = widget->property("theme_width").toInt();
   int theme_height = widget->property("theme_height").toInt();
+  qDebug() << widget;
+  qDebug() << theme_x << theme_y << theme_width << theme_height;
   if (old_size.height() <= 0 || old_size.width() <= 0)
     return;
   if (new_size.height() <= 0 || new_size.width() <= 0)
@@ -325,8 +327,10 @@ void AOApplication::recursive_resize(QResizeEvent *event, QWidget *widget,
   float y_ratio = new_size.height() / (float)original_ratio.height();
   float x_ratio = new_size.width() / (float)original_ratio.width();
 
+  qDebug() << widget->x() << widget->y() << widget->width() << widget->height();
   widget->move(theme_x * x_ratio, theme_y * y_ratio);
   widget->resize(theme_width * x_ratio, theme_height * y_ratio);
+  qDebug() << widget->x() << widget->y() << widget->width() << widget->height();
 
   for (QWidget *child : widget->findChildren<QWidget *>())
     recursive_resize(event, child, original_ratio);

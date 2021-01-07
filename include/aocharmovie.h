@@ -16,6 +16,9 @@ class AOCharMovie : public QLabel
 public:
   AOCharMovie(QWidget *p_parent, AOApplication *p_ao_app);
 
+  using QLabel::resizeEvent;
+  virtual void resizeEvent(QResizeEvent *);
+
   void play(QString p_char, QString p_emote, QString emote_prefix, bool show);
   bool play_pre(QString p_char, QString p_emote, bool show);
   void play_talking(QString p_char, QString p_emote, bool show);

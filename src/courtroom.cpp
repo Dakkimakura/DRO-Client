@@ -2528,3 +2528,13 @@ void Courtroom::pause_timer(int timer_id)
 
   ui_timers[timer_id]->pause();
 }
+
+void Courtroom::resizeEvent(QResizeEvent *event)
+{
+  QMainWindow::resizeEvent(event);
+  QSize original_size(this->property("theme_width").toInt(),
+                      this->property("theme_height").toInt());
+
+  for (QWidget *children : findChildren<QWidget *>())
+    ao_app->recursive_resize(event, children, original_size);
+}
