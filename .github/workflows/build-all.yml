@@ -317,9 +317,9 @@ jobs:
       run: |
         git clone https://github.com/Skycoder42/QtApng
         cd QtApng
-        ls .
-        ls -R 5.15.2/
-        5.15.2/gcc_64/bin/qmake
+        ls ..
+        ls -R ../5.15.2/
+        ../5.15.2/gcc_64/bin/qmake
         make -j2
         cp plugins/imageformats/libqapng.so ..
         cd ..
