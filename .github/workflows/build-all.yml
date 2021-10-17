@@ -118,6 +118,7 @@ jobs:
       working-directory: "${{env.parentworkspace}}/Danganronpa Online"
       shell: bash
       run: |
+        ls ..
         windeployqt.exe --quick --compiler-runtime .
         cp ../discord-rpc/win32-dynamic/bin/discord-rpc.dll .
         cp ../bass.dll .
