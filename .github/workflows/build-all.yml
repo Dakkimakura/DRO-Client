@@ -80,7 +80,7 @@ jobs:
     - name: Install MinGW
       shell: bash
       working-directory: ${{env.parentworkspace}}
-      run: aqt tool -O ./Qt windows tools_mingw 7.3.0-1-202004170606 qt.tools.win32_mingw730
+      run: aqt tool -O ./Qt windows tools_mingw 8.1.0-1-202004170606 qt.tools.win32_mingw810
 
     - name: Setup MinGW
       shell: bash
@@ -90,22 +90,22 @@ jobs:
       # Therefore, I just brought the MinGW32 folder to the MinGW64 folder.
       # Tom Scott would be proud of this bodge
       run: |
-        export PATH=/d/a/DRO-Client/Qt/Tools/mingw730_32/bin:$PATH
+        export PATH=/d/a/DRO-Client/Qt/Tools/mingw810_32/bin:$PATH
         rm -r /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/
-        cp -r /d/a/DRO-Client/Qt/Tools/mingw730_32/ /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/
+        cp -r /d/a/DRO-Client/Qt/Tools/mingw810_32/ /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/
         
     - name: Run qmake
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        ./Qt/5.15.2/mingw73_32/bin/qmake.exe -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec win32-g++ "CONFIG+=qtquickcompiler"
+        ./Qt/5.15.2/mingw81_32/bin/qmake.exe -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec win32-g++ "CONFIG+=qtquickcompiler"
   
     - name: Run Make
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        ./Qt/Tools/mingw730_32/bin/mingw32-make.exe -f ./Makefile qmake_all
-        ./Qt/Tools/mingw730_32/bin/mingw32-make.exe -j8
+        ./Qt/Tools/mingw810_32/bin/mingw32-make.exe -f ./Makefile qmake_all
+        ./Qt/Tools/mingw810_32/bin/mingw32-make.exe -j8
       
     - name: Set up deploy folder
       shell: bash
@@ -122,7 +122,7 @@ jobs:
         cp ../discord-rpc/win32-dynamic/bin/discord-rpc.dll .
         cp ../bass.dll .
         cp ../bassopus.dll .
-        cp ../mingw73_32/plugins/imageformats/qapng.dll ./imageformats/
+        cp ../mingw81_32/plugins/imageformats/qapng.dll ./imageformats/
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libgcc_s_dw2-1.dll .
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libwinpthread-1.dll .
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libstdc++-6.dll .
