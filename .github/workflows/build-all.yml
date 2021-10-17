@@ -69,7 +69,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: '5.14.2'
+        version: '5.15.2'
         arch: 'win32_mingw73'
 
     - name: Install AQt
@@ -98,7 +98,7 @@ jobs:
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        ./Qt/5.14.2/mingw73_32/bin/qmake.exe -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec win32-g++ "CONFIG+=qtquickcompiler"
+        ./Qt/5.15.2/mingw73_32/bin/qmake.exe -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec win32-g++ "CONFIG+=qtquickcompiler"
   
     - name: Run Make
       shell: bash
@@ -196,13 +196,13 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: '5.14.2'
+        version: '5.15.2'
 
     - name: Run qmake
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        ./Qt/5.14.2/clang_64/bin/qmake -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec macx-clang "CONFIG+=x86_64" "CONFIG+=qtquickcompiler"
+        ./Qt/5.15.2/clang_64/bin/qmake -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec macx-clang "CONFIG+=x86_64" "CONFIG+=qtquickcompiler"
   
     - name: Run make
       shell: bash
@@ -223,7 +223,7 @@ jobs:
       working-directory: "${{env.parentworkspace}}/Danganronpa Online"
       shell: bash
       run: |
-        ../Qt/5.14.2/clang_64/bin/macdeployqt "Danganronpa Online.app"
+        ../Qt/5.15.2/clang_64/bin/macdeployqt "Danganronpa Online.app"
         cp ../discord-rpc/osx-dynamic/lib/libdiscord-rpc.dylib "./Danganronpa Online.app/Contents/Frameworks/"
         cp ../discord-rpc/osx-dynamic/lib/libdiscord-rpc.dylib "./Danganronpa Online.app/Contents/MacOS/"
         cp ../libbass.dylib "./Danganronpa Online.app/Contents/Frameworks/"
@@ -302,9 +302,7 @@ jobs:
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        sudo apt-get install build-essential
-        sudo apt-get install qt5-default qttools5-dev
-        sudo apt-get install libqt5designer5
+        sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
         sudo apt-get install git
         sudo snap install discord
         
