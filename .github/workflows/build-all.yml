@@ -70,7 +70,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: '5.15.2'
-        arch: 'win32_mingw73'
+        arch: 'win32_mingw81'
 
     - name: Install AQt
       shell: bash
@@ -302,7 +302,11 @@ jobs:
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+        sudo apt-get install qtbase5-dev 
+        sudo apt-get install qtchooser 
+        sudo apt-get install qt5-qmake
+        sudo apt-get install qtbase5-dev-tools
+        sudo apt-get install qttools5-dev-tools
         sudo apt-get install git
         sudo snap install discord
         
