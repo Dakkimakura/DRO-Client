@@ -75,7 +75,9 @@ jobs:
     - name: Install AQt
       shell: bash
       working-directory: ${{env.parentworkspace}} 
-      run: pip install aqtinstall
+      run: |
+        pip install --upgrade pip
+        pip install aqtinstall
 
     - name: Install MinGW
       shell: bash
@@ -301,13 +303,16 @@ jobs:
     - name: Install AQt
       shell: bash
       working-directory: ${{env.parentworkspace}} 
-      run: pip install aqtinstall
+      run: |
+        pip install --upgrade pip
+        pip install aqtinstall
       
     - name: Install Qt
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
         aqt install-qt linux desktop 5.15.2
+        sudo apt install libgl1-mesa-dev
         sudo apt-get install git
         sudo snap install discord
         
@@ -317,8 +322,6 @@ jobs:
       run: |
         git clone https://github.com/Skycoder42/QtApng
         cd QtApng
-        ls ..
-        ls -R ../5.15.2/
         ../5.15.2/gcc_64/bin/qmake
         make -j2
         cp plugins/imageformats/libqapng.so ..
