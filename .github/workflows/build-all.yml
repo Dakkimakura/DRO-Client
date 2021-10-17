@@ -118,12 +118,11 @@ jobs:
       working-directory: "${{env.parentworkspace}}/Danganronpa Online"
       shell: bash
       run: |
-        ls ..
         windeployqt.exe --quick --compiler-runtime .
         cp ../discord-rpc/win32-dynamic/bin/discord-rpc.dll .
         cp ../bass.dll .
         cp ../bassopus.dll .
-        cp ../mingw81_32/plugins/imageformats/qapng.dll ./imageformats/
+        cp ../mingw73_32/plugins/imageformats/qapng.dll ./imageformats/
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libgcc_s_dw2-1.dll .
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libwinpthread-1.dll .
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libstdc++-6.dll .
