@@ -317,7 +317,7 @@ jobs:
       run: |
         git clone https://github.com/Skycoder42/QtApng
         cd QtApng
-        qmake
+        5.15.2/gcc_64/bin/qmake
         make -j2
         cp plugins/imageformats/libqapng.so ..
         cd ..
@@ -327,7 +327,7 @@ jobs:
       shell: bash
       working-directory: ${{github.workspace}}
       run: |
-        qmake
+        ../5.15.2/gcc_64/bin/qmake
   
     - name: Run Make
       shell: bash
