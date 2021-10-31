@@ -68,10 +68,7 @@ void set_font(QWidget *p_widget, QString p_identifier, QString ini_file, AOAppli
   {
     font_name = ao_app->get_font_name("font_default", ini_file);
   }
-  QFont font = QFont(font_name);
-  float f_weight_pixels = f_weight*4.0/3;
-  font.setPixelSize((int)(f_weight_pixels+0.5f));
-  p_widget->setFont(font);
+  p_widget->setFont(QFont(font_name, f_weight));
 
   const QColor l_font_color = ao_app->get_color(p_identifier + "_color", ini_file);
   int bold = ao_app->get_font_property(p_identifier + "_bold", ini_file);
