@@ -217,7 +217,7 @@ void AOConfigPrivate::save_file()
 
   // audio
   if (favorite_device_driver.has_value())
-    cfg.setValue("favorite_device_driver", favorite_device_driver.value());
+    cfg.setValue("favorite_device_driver", favorite_device_driver.value_or(""));
 
   cfg.setValue("suppress_background_audio", suppress_background_audio);
   cfg.setValue("default_master", master_volume);
@@ -256,7 +256,7 @@ void AOConfigPrivate::update_favorite_device()
 {
   if (!favorite_device_driver.has_value())
     return;
-  audio_engine->set_favorite_device_by_driver(favorite_device_driver.value());
+  audio_engine->set_favorite_device_by_driver(favorite_device_driver.value_or(""));
 }
 
 void AOConfigPrivate::on_application_state_changed(Qt::ApplicationState p_state)
@@ -811,7 +811,7 @@ void AOConfig::set_suppress_background_audio(bool p_enabled)
 
 void AOConfig::set_favorite_device_driver(QString p_device_driver)
 {
-  if (d->favorite_device_driver.has_value() && d->favorite_device_driver.value() == p_device_driver)
+  if (d->favorite_device_driver.has_value() && d->favorite_device_driver.value_or("") == p_device_driver)
     return;
   d->favorite_device_driver = p_device_driver;
   d->update_favorite_device();

@@ -100,8 +100,9 @@ std::optional<DRAudioStream::ptr> DRAudioStreamFamily::play_stream(QString p_fil
   std::optional<DRAudioStream::ptr> r_stream = create_stream(p_file);
   if (r_stream.has_value())
   {
-    auto stream = r_stream.value();
-    qWarning() << "playing" << stream->get_file().value();
+    DRAudioStream::ptr default_stream(new DRAudioStream(m_family));
+    auto stream = r_stream.value_or(default_stream);
+    qWarning() << "playing" << stream->get_file().value_or("");
     stream->play();
   }
   return r_stream;
@@ -163,7 +164,7 @@ void DRAudioStreamFamily::on_stream_finished()
     return;
 
   if (auto file = invoker->get_file(); file)
-    qInfo() << "removing" << file.value();
+    qInfo() << "removing" << file.value_or("");
   else
     qWarning() << "removing unspecified stream";
 

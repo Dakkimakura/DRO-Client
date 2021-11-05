@@ -133,7 +133,7 @@ void DRAudioEnginePrivate::on_event_tick()
     if (!i_device.is_enabled())
       continue;
 
-    if (favorite_device && favorite_device.value().get_driver() == i_device.get_driver())
+    if (favorite_device && favorite_device.value_or(DRAudioDevice()).get_driver() == i_device.get_driver())
     {
       // if our favorite device doesn't have an id then
       // it was most likely set through the driver
@@ -159,5 +159,5 @@ void DRAudioEnginePrivate::on_event_tick()
 #endif
     return;
   }
-  engine->set_device(target_device.value());
+  engine->set_device(target_device.value_or(DRAudioDevice()));
 }

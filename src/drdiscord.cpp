@@ -174,10 +174,10 @@ void DRDiscord::set_state(const DRDiscord::State f_state)
 void DRDiscord::set_server_name(const QString &f_server_name)
 {
   Q_ASSERT_X(!f_server_name.trimmed().isEmpty(), "DRDiscord", "a server name is required");
-  if (m_server_name.has_value() && m_server_name.value() == f_server_name)
+  if (m_server_name.has_value() && m_server_name.value_or("") == f_server_name)
     return;
   m_server_name = f_server_name;
-  Q_EMIT server_name_changed(m_server_name.value());
+  Q_EMIT server_name_changed(m_server_name.value_or(""));
 }
 
 void DRDiscord::clear_server_name()
@@ -189,10 +189,10 @@ void DRDiscord::clear_server_name()
 void DRDiscord::set_character_name(const QString &f_character_name)
 {
   Q_ASSERT_X(!f_character_name.trimmed().isEmpty(), "DRDiscord", "a server name is required");
-  if (m_character_name.has_value() && m_character_name.value() == f_character_name)
+  if (m_character_name.has_value() && m_character_name.value_or("") == f_character_name)
     return;
   m_character_name = f_character_name;
-  Q_EMIT character_name_changed(m_character_name.value());
+  Q_EMIT character_name_changed(m_character_name.value_or(""));
 }
 
 void DRDiscord::clear_character_name()
@@ -226,7 +226,7 @@ void DRDiscord::on_update_queued()
     if (!hide_server_enabled())
     {
       m_buf_details = QString("In: %1")
-                          .arg(m_server_name.has_value() ? m_server_name.value().toUtf8() : QString("<private>"))
+                          .arg(m_server_name.has_value() ? m_server_name.value_or("").toUtf8() : QString("<private>"))
                           .toUtf8();
     }
 
@@ -234,7 +234,7 @@ void DRDiscord::on_update_queued()
     if (!hide_character_enabled())
     {
       m_buf_state.clear();
-      m_buf_state = m_character_name.has_value() ? QString("As: %1").arg(m_character_name.value()).toUtf8()
+      m_buf_state = m_character_name.has_value() ? QString("As: %1").arg(m_character_name.value_or("")).toUtf8()
                                                  : QByteArray("Spectating");
     }
     break;

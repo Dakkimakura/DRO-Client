@@ -17,7 +17,7 @@ DRAudioStream::~DRAudioStream()
 {
   if (m_hstream.has_value())
   {
-    const HSTREAM hstream = m_hstream.value();
+    const HSTREAM hstream = m_hstream.value_or(0);
 
     while (!m_hsync_stack.empty())
     {
@@ -43,18 +43,18 @@ bool DRAudioStream::is_playing() const
 {
   if (!m_hstream.has_value())
     return false;
-  return BASS_ChannelIsActive(m_hstream.value()) == BASS_ACTIVE_PLAYING;
+  return BASS_ChannelIsActive(m_hstream.value_or(0)) == BASS_ACTIVE_PLAYING;
 }
 
 void DRAudioStream::play()
 {
   if (!m_hstream.has_value())
     return;
-  const BOOL result = BASS_ChannelPlay(m_hstream.value(), FALSE);
+  const BOOL result = BASS_ChannelPlay(m_hstream.value_or(0), FALSE);
   if (result == FALSE)
   {
     qWarning() << DRAudioError(
-                      QString("failed to play file %1: %2").arg(m_file.value()).arg(DRAudio::get_last_bass_error()))
+                      QString("failed to play file %1: %2").arg(m_file.value_or("")).arg(DRAudio::get_last_bass_error()))
                       .what();
     Q_EMIT finished();
   }
@@ -64,7 +64,7 @@ void DRAudioStream::stop()
 {
   if (!m_hstream.has_value())
     return;
-  BASS_ChannelStop(m_hstream.value());
+  BASS_ChannelStop(m_hstream.value_or(0));
   Q_EMIT finished();
 }
 
@@ -113,7 +113,7 @@ void DRAudioStream::set_volume(float p_volume)
   if (!m_hstream.has_value())
     return;
   m_volume = p_volume;
-  BASS_ChannelSetAttribute(m_hstream.value(), BASS_ATTRIB_VOL, float(p_volume) * 0.01f);
+  BASS_ChannelSetAttribute(m_hstream.value_or(0), BASS_ATTRIB_VOL, float(p_volume) * 0.01f);
 }
 
 #include <QTimer>
@@ -153,8 +153,8 @@ void DRAudioStream::cache_position()
     return;
   if (m_position.has_value())
     return;
-  m_position = BASS_ChannelGetPosition(m_hstream.value(), BASS_POS_BYTE);
-  BASS_ChannelStop(m_hstream.value());
+  m_position = BASS_ChannelGetPosition(m_hstream.value_or(0), BASS_POS_BYTE);
+  BASS_ChannelStop(m_hstream.value_or(0));
 }
 
 void DRAudioStream::on_device_error()
@@ -173,7 +173,7 @@ void DRAudioStream::update_device()
 
   if (is_playing())
     return;
-  const QString file = m_file.value();
+  const QString file = m_file.value_or("");
 
   m_file.reset();
   m_hstream.reset();
@@ -186,7 +186,7 @@ void DRAudioStream::update_device()
 
   if (m_position.has_value())
   {
-    if (BASS_ChannelSetPosition(m_hstream.value(), m_position.value(), BASS_POS_BYTE) == FALSE)
+    if (BASS_ChannelSetPosition(m_hstream.value_or(0), m_position.value_or(0), BASS_POS_BYTE) == FALSE)
       qWarning() << DRAudioError(
                         QString("failed to set position for %1: %2").arg(file).arg(DRAudio::get_last_bass_error()))
                         .what();

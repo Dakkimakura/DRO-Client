@@ -120,15 +120,15 @@ void DRAudioEngine::set_device(DRAudioDevice p_device)
   d->previous_device = d->device;
   d->device = d->device_map.value(p_device.get_driver());
   d->update_device();
-  Q_EMIT d->invoke_signal("device_changed", Q_ARG(DRAudioDevice, d->device.value()));
+  Q_EMIT d->invoke_signal("device_changed", Q_ARG(DRAudioDevice, d->device.value_or(DRAudioDevice())));
 }
 
 void DRAudioEngine::set_favorite_device(DRAudioDevice p_device)
 {
-  if (d->favorite_device.has_value() && d->favorite_device.value().get_driver() == p_device.get_driver())
+  if (d->favorite_device.has_value() && d->favorite_device.value_or(DRAudioDevice()).get_driver() == p_device.get_driver())
     return;
   d->favorite_device = p_device;
-  Q_EMIT d->invoke_signal("favorite_device_changed", Q_ARG(DRAudioDevice, d->favorite_device.value()));
+  Q_EMIT d->invoke_signal("favorite_device_changed", Q_ARG(DRAudioDevice, d->favorite_device.value_or(DRAudioDevice())));
 }
 
 void DRAudioEngine::set_favorite_device_by_driver(QString p_device_driver)
