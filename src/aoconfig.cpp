@@ -54,14 +54,17 @@ private:
   bool discord_hide_character = false;
   QString theme;
   QString gamemode;
-  bool manual_gamemode;
+  QString manual_gamemode;
+  bool manual_gamemode_selection;
   QString timeofday;
-  bool manual_timeofday;
+  QString manual_timeofday;
+  bool manual_timeofday_selection;
   QString showname;
   QString showname_placeholder;
   QMap<QString, QString> ini_map;
   bool always_pre;
   int chat_tick_interval;
+  bool emote_preview;
   int log_max_lines;
   bool log_display_timestamp;
   bool log_display_self_highlight;
@@ -124,12 +127,13 @@ void AOConfigPrivate::read_file()
   if (theme.trimmed().isEmpty())
     theme = "default";
 
-  gamemode = cfg.value("gamemode").toString();
-  manual_gamemode = cfg.value("manual_gamemode", false).toBool();
-  timeofday = cfg.value("timeofday").toString();
-  manual_timeofday = cfg.value("manual_timeofday", false).toBool();
+  manual_gamemode = cfg.value("gamemode").toString();
+  manual_gamemode_selection = cfg.value("manual_gamemode", false).toBool();
+  manual_timeofday = cfg.value("timeofday").toString();
+  manual_timeofday_selection = cfg.value("manual_timeofday", false).toBool();
   always_pre = cfg.value("always_pre", true).toBool();
   chat_tick_interval = cfg.value("chat_tick_interval", 60).toInt();
+  emote_preview = cfg.value("emote_preview", true).toBool();
   log_max_lines = cfg.value("chatlog_limit", 100).toInt();
   log_is_topdown = cfg.value("chatlog_scrolldown", true).toBool();
   log_display_timestamp = cfg.value("chatlog_display_timestamp", true).toBool();
@@ -195,12 +199,13 @@ void AOConfigPrivate::save_file()
   cfg.setValue("discord_hide_character", discord_hide_character);
 
   cfg.setValue("theme", theme);
-  cfg.setValue("gamemode", gamemode);
-  cfg.setValue("manual_gamemode", manual_gamemode);
-  cfg.setValue("timeofday", timeofday);
-  cfg.setValue("manual_timeofday", manual_timeofday);
+  cfg.setValue("gamemode", manual_gamemode);
+  cfg.setValue("manual_gamemode", manual_gamemode_selection);
+  cfg.setValue("timeofday", manual_timeofday);
+  cfg.setValue("manual_timeofday", manual_timeofday_selection);
   cfg.setValue("always_pre", always_pre);
   cfg.setValue("chat_tick_interval", chat_tick_interval);
+  cfg.setValue("emote_preview", emote_preview);
   cfg.setValue("chatlog_limit", log_max_lines);
   cfg.setValue("chatlog_display_timestamp", log_display_timestamp);
   cfg.setValue("chatlog_display_self_highlight", log_display_self_highlight);
@@ -364,15 +369,20 @@ QString AOConfig::theme() const
   return d->theme;
 }
 
+QString AOConfig::gamemode() const
+{
+  return d->gamemode;
+}
+
 /**
  * @brief Return the current gamemode. If no gamemode is set, return the
  * empty string.
  *
  * @return Current gamemode, or empty string if not set.
  */
-QString AOConfig::gamemode() const
+QString AOConfig::manual_gamemode() const
 {
-  return d->gamemode;
+  return d->manual_gamemode;
 }
 
 /**
@@ -385,20 +395,25 @@ QString AOConfig::gamemode() const
  *
  * @return Current manual gamemode status.
  */
-bool AOConfig::manual_gamemode_enabled() const
+bool AOConfig::is_manual_gamemode_selection_enabled() const
 {
-  return d->manual_gamemode;
+  return d->manual_gamemode_selection;
 }
 
-/**
- * @brief Returns the current time of day. If no time of day is set, return
- * the empty string.
- *
- * @return Current gamemode, or empty string if not set.
- */
 QString AOConfig::timeofday() const
 {
   return d->timeofday;
+}
+
+/**
+ * @brief Returns the current manual time of day. If no time of day is set, return
+ * the empty string.
+ *
+ * @return Current manual time of day, or empty string if not set.
+ */
+QString AOConfig::manual_timeofday() const
+{
+  return d->manual_timeofday;
 }
 
 /**
@@ -411,9 +426,9 @@ QString AOConfig::timeofday() const
  *
  * @return Current manual time of day status.
  */
-bool AOConfig::manual_timeofday_enabled() const
+bool AOConfig::is_manual_timeofday_selection_enabled() const
 {
-  return d->manual_timeofday;
+  return d->manual_timeofday_selection;
 }
 
 bool AOConfig::always_pre_enabled() const
@@ -424,6 +439,11 @@ bool AOConfig::always_pre_enabled() const
 int AOConfig::chat_tick_interval() const
 {
   return d->chat_tick_interval;
+}
+
+bool AOConfig::emote_preview_enabled() const
+{
+  return d->emote_preview;
 }
 
 int AOConfig::log_max_lines() const
@@ -606,7 +626,7 @@ void AOConfig::set_discord_presence(const bool p_enabled)
   if (d->discord_presence == p_enabled)
     return;
   d->discord_presence = p_enabled;
-  Q_EMIT d->invoke_signal("discord_presence_changed", Q_ARG(bool, d->discord_presence));
+  d->invoke_signal("discord_presence_changed", Q_ARG(bool, d->discord_presence));
 }
 
 void AOConfig::set_discord_hide_server(const bool p_enabled)
@@ -614,7 +634,7 @@ void AOConfig::set_discord_hide_server(const bool p_enabled)
   if (d->discord_hide_server == p_enabled)
     return;
   d->discord_hide_server = p_enabled;
-  Q_EMIT d->invoke_signal("discord_hide_server_changed", Q_ARG(bool, d->discord_hide_server));
+  d->invoke_signal("discord_hide_server_changed", Q_ARG(bool, d->discord_hide_server));
 }
 
 void AOConfig::set_discord_hide_character(const bool p_enabled)
@@ -622,7 +642,7 @@ void AOConfig::set_discord_hide_character(const bool p_enabled)
   if (d->discord_hide_character == p_enabled)
     return;
   d->discord_hide_character = p_enabled;
-  Q_EMIT d->invoke_signal("discord_hide_character_changed", Q_ARG(bool, d->discord_hide_character));
+  d->invoke_signal("discord_hide_character_changed", Q_ARG(bool, d->discord_hide_character));
 }
 
 void AOConfig::set_theme(QString p_string)
@@ -630,6 +650,8 @@ void AOConfig::set_theme(QString p_string)
   if (d->theme == p_string)
     return;
   d->theme = p_string;
+  d->manual_gamemode.clear();
+  d->manual_timeofday.clear();
   d->invoke_signal("theme_changed", Q_ARG(QString, p_string));
 }
 
@@ -641,12 +663,21 @@ void AOConfig::set_gamemode(QString p_string)
   d->invoke_signal("gamemode_changed", Q_ARG(QString, p_string));
 }
 
-void AOConfig::set_manual_gamemode(bool p_enabled)
+void AOConfig::set_manual_gamemode(QString p_string)
 {
-  if (d->manual_gamemode == p_enabled)
+  if (d->manual_gamemode == p_string)
     return;
-  d->manual_gamemode = p_enabled;
-  d->invoke_signal("manual_gamemode_changed", Q_ARG(bool, p_enabled));
+  d->manual_gamemode = p_string;
+  d->manual_timeofday.clear();
+  d->invoke_signal("manual_gamemode_changed", Q_ARG(QString, p_string));
+}
+
+void AOConfig::set_manual_gamemode_selection_enabled(bool p_enabled)
+{
+  if (d->manual_gamemode_selection == p_enabled)
+    return;
+  d->manual_gamemode_selection = p_enabled;
+  d->invoke_signal("manual_gamemode_selection_changed", Q_ARG(bool, p_enabled));
 }
 
 void AOConfig::set_timeofday(QString p_string)
@@ -657,12 +688,20 @@ void AOConfig::set_timeofday(QString p_string)
   d->invoke_signal("timeofday_changed", Q_ARG(QString, p_string));
 }
 
-void AOConfig::set_manual_timeofday(bool p_enabled)
+void AOConfig::set_manual_timeofday(QString p_string)
 {
-  if (d->manual_timeofday == p_enabled)
+  if (d->manual_timeofday == p_string)
     return;
-  d->manual_timeofday = p_enabled;
-  d->invoke_signal("manual_timeofday_changed", Q_ARG(bool, p_enabled));
+  d->manual_timeofday = p_string;
+  d->invoke_signal("manual_timeofday_changed", Q_ARG(QString, p_string));
+}
+
+void AOConfig::set_manual_timeofday_selection_enabled(bool p_enabled)
+{
+  if (d->manual_timeofday_selection == p_enabled)
+    return;
+  d->manual_timeofday_selection = p_enabled;
+  d->invoke_signal("manual_timeofday_selection_changed", Q_ARG(bool, p_enabled));
 }
 
 void AOConfig::set_always_pre(bool p_enabled)
@@ -679,6 +718,14 @@ void AOConfig::set_chat_tick_interval(int p_number)
     return;
   d->chat_tick_interval = p_number;
   d->invoke_signal("chat_tick_interval_changed", Q_ARG(int, p_number));
+}
+
+void AOConfig::set_emote_preview(bool p_enabled)
+{
+  if (d->emote_preview == p_enabled)
+    return;
+  d->emote_preview = p_enabled;
+  d->invoke_signal("emote_preview_changed", Q_ARG(bool, p_enabled));
 }
 
 void AOConfig::set_log_max_lines(int p_number)

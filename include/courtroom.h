@@ -57,6 +57,7 @@ public:
   explicit Courtroom(AOApplication *p_ao_app);
   ~Courtroom();
 
+  QVector<char_type> get_character_list();
   void set_character_list(QVector<char_type> character_list);
   void set_area_list(QStringList area_list);
   void set_music_list(QStringList music_list);
@@ -66,21 +67,12 @@ public:
   // helper function that calls above function on the relevant widgets
   void set_fonts();
 
-  // sets dropdown menu stylesheet
-  void set_dropdown(QWidget *widget, QString target_tag);
-
-  // helper funciton that call above function on the relevant widgets
-  void set_dropdowns();
-
   void set_window_title(QString p_title);
-
-  // sets status as taken on character with cid n_char and places proper shading
-  // on charselect
-  void set_taken(int n_char, bool p_taken);
 
   // sets the current background to argument. also does some checks to see if
   // it's a legacy bg
-  void set_background(QString p_background);
+  DRAreaBackground get_background();
+  void set_background(DRAreaBackground p_area_bg);
 
   void set_tick_rate(const int tick_rate);
 
@@ -99,7 +91,7 @@ public:
   void done_received();
 
   // sets desk and bg based on pos in chatmessage
-  void set_scene();
+  void update_background_scene();
 
   // sets text color based on text color in chatmessage
   void set_text_color();
@@ -117,9 +109,11 @@ public:
 public:
   QString get_character();
   QString get_character_ini();
+  QString get_character_content_url();
   void update_iniswap_list();
   void update_default_iniswap_item();
   void select_base_character_iniswap();
+  void refresh_character_content_url();
 
   // Set the showname of the client
   void set_showname(QString p_showname);
@@ -132,6 +126,8 @@ public:
 
   // helper function that populates ui_music_list with the contents of
   // music_list
+  void filter_list_widget(QListWidget *widget, QString filter);
+  bool is_area_music_list_separated();
   void list_music();
   void list_areas();
 
@@ -227,8 +223,6 @@ private:
   AOApplication *ao_app = nullptr;
   AOConfig *ao_config = nullptr;
 
-  QTimer *m_reload_timer = nullptr;
-
   QVector<char_type> m_chr_list;
   QVector<evi_type> m_evidence_list;
   QStringList m_area_list;
@@ -300,7 +294,7 @@ private:
   // if true, a reload theme order was delayed to be executed *after* a shout
   // this allows reload theme orders that were received while a shout was
   // playing to be executed only after the shout is done playing
-  bool shout_delayed_reload_theme = false;
+  bool m_shout_reload_theme = false;
 
   int m_shout_state = 0;
   int m_effect_state = 0;
@@ -320,6 +314,7 @@ private:
   int char_rows = 9;
   int m_page_max_chr_count = 90;
 
+  QString m_character_content_url;
   QVector<DREmote> m_emote_list;
   int m_emote_id = 0;
   int m_current_emote_page = 0;
@@ -338,9 +333,9 @@ private:
   int evidence_rows = 3;
   int max_evidence_on_page = 18;
 
-  int current_clock = -1;
+  int m_current_clock = -1;
 
-  QString current_background = "gs4";
+  DRAreaBackground m_background;
 
   AOImageDisplay *ui_background = nullptr;
 
@@ -383,7 +378,9 @@ private:
   DRChatLog *ui_ooc_chatlog = nullptr;
 
   QListWidget *ui_area_list = nullptr;
+  QLineEdit *ui_area_search = nullptr;
   QListWidget *ui_music_list = nullptr;
+  QLineEdit *ui_music_search = nullptr;
 
   QListWidget *ui_sfx_list = nullptr;
   QVector<DRSfx> m_sfx_list;
@@ -396,8 +393,6 @@ private:
 
   QLineEdit *ui_ooc_chat_name = nullptr;
   QLineEdit *ui_ooc_chat_message = nullptr;
-
-  QLineEdit *ui_music_search = nullptr;
 
   QLineEdit *ui_sfx_search = nullptr;
 
@@ -575,17 +570,22 @@ private slots:
   void on_ooc_name_editing_finished();
   void on_ooc_return_pressed();
 
-  void on_music_search_edited();
-  void on_music_list_clicked();
   void on_area_list_clicked();
-  void on_music_list_double_clicked(QModelIndex p_model);
   void on_area_list_double_clicked(QModelIndex p_model);
+  void on_area_search_edited(QString);
+  void on_area_search_edited();
+
+  void on_music_list_clicked();
+  void on_music_list_double_clicked(QModelIndex p_model);
+  void on_music_search_edited(QString);
+  void on_music_search_edited();
 
   void select_emote(int p_id);
 
   void on_emote_clicked(int id);
   void show_emote_tooltip(int id, QPoint global_pos);
   void hide_emote_tooltip(int id);
+  void on_emote_preview_toggled(bool);
 
   void on_emote_left_clicked();
   void on_emote_right_clicked();
@@ -643,7 +643,7 @@ private slots:
   void on_wtce_clicked();
 
   void on_change_character_clicked();
-  void on_app_reload_theme_requested();
+  void reload_theme();
   void on_call_mod_clicked();
 
   void on_switch_area_music_clicked();
@@ -707,6 +707,7 @@ public:
   void update_all_sfx_item_color();
 
 public slots:
+  void filter_sfx_list(QString);
   void filter_sfx_list();
 
 private:

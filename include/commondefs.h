@@ -2,7 +2,7 @@
 
 class QString;
 
-extern const QString BACKGROUND_BACKGROUNDS_INI;
+extern const QString BACKGROUND_DEFAULT_NAME;
 
 extern const QString BASE_CONFIG_INI;
 
@@ -18,6 +18,7 @@ extern const QString COURTROOM_FONTS_INI;
 extern const QString COURTROOM_LAYERS_INI;
 extern const QString COURTROOM_SOUNDS_INI;
 extern const QString COURTROOM_TEXT_COLOR_INI;
+extern const QString COURTROOM_STYLESHEETS_CSS;
 
 extern const QString LOBBY_DESIGN_INI;
 extern const QString LOBBY_FONTS_INI;

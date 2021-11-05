@@ -35,6 +35,10 @@ AOApplication::AOApplication(int &argc, char **argv) : QApplication(argc, argv)
   connect(ao_config, SIGNAL(theme_changed(QString)), this, SLOT(handle_theme_modification()));
   connect(ao_config, SIGNAL(gamemode_changed(QString)), this, SLOT(handle_theme_modification()));
   connect(ao_config, SIGNAL(timeofday_changed(QString)), this, SLOT(handle_theme_modification()));
+  connect(ao_config, SIGNAL(manual_gamemode_changed(QString)), this, SLOT(handle_theme_modification()));
+  connect(ao_config, SIGNAL(manual_gamemode_selection_changed(bool)), this, SLOT(handle_theme_modification()));
+  connect(ao_config, SIGNAL(manual_timeofday_changed(QString)), this, SLOT(handle_theme_modification()));
+  connect(ao_config, SIGNAL(manual_timeofday_selection_changed(bool)), this, SLOT(handle_theme_modification()));
   connect(ao_config_panel, SIGNAL(reload_theme()), this, SLOT(handle_theme_modification()));
   ao_config_panel->hide();
 
@@ -157,6 +161,8 @@ void AOApplication::destruct_courtroom()
   {
     delete m_courtroom;
     is_courtroom_constructed = false;
+    ao_config->set_gamemode(nullptr);
+    ao_config->set_timeofday(nullptr);
   }
   else
   {
@@ -192,11 +198,16 @@ bool AOApplication::has_chat_speed_feature() const
   return feature_chat_speed;
 }
 
+bool AOApplication::has_character_availability_request_feature() const
+{
+  return feature_charscheck;
+}
+
 void AOApplication::handle_theme_modification()
 {
   load_fonts();
 
-  Q_EMIT reload_theme();
+  Q_EMIT theme_reloaded();
 }
 
 void AOApplication::set_favorite_list()
@@ -225,17 +236,15 @@ QString AOApplication::get_current_char()
  * @return A sanitized path. If any check fails, the path returned is an empty string. The sanitized path does not
  * necessarily exist.
  */
-QString AOApplication::sanitize_path(QString p_file)
+bool AOApplication::is_safe_path(QString p_file)
 {
   if (!p_file.contains(".."))
-    return p_file;
-
-  QStringList list = p_file.split(QRegularExpression("[\\/]"));
-  while (!list.isEmpty())
-    if (list.takeFirst().contains(QRegularExpression("\\.{2,}")))
-      return nullptr;
-
-  return p_file;
+    return true;
+  const QStringList l_item_list = p_file.split(QRegularExpression("[\\/]"));
+  for (auto it = l_item_list.crbegin(); it != l_item_list.crend(); ++it)
+    if (*it == "..")
+      return false;
+  return true;
 }
 
 void AOApplication::toggle_config_panel()

@@ -48,6 +48,16 @@ jobs:
         cp ./c/bass.h ./DRO-Client/3rd/include
         cp ./bass.dll ./DRO-Client/3rd/x86
         cp ./c/bass.lib ./DRO-Client/3rd/x86
+      
+    - name: Fetch BassOpus external library
+      shell: bash
+      working-directory: ${{env.parentworkspace}}
+      run: |
+        curl http://www.un4seen.com/files/bassopus24.zip -o bassopus.zip
+        unzip bassopus.zip
+        cp ./c/bassopus.h ./DRO-Client/3rd/include
+        cp ./bassopus.dll ./DRO-Client/3rd/x86
+        cp ./c/bassopus.lib ./DRO-Client/3rd/x86
         
     - name: Fetch QtApng external library
       shell: bash
@@ -111,6 +121,7 @@ jobs:
         windeployqt.exe --quick --compiler-runtime .
         cp ../discord-rpc/win32-dynamic/bin/discord-rpc.dll .
         cp ../bass.dll .
+        cp ../bassopus.dll .
         cp ../mingw73_32/plugins/imageformats/qapng.dll ./imageformats/
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libgcc_s_dw2-1.dll .
         cp  /c/ProgramData/Chocolatey/lib/mingw/tools/install/mingw64/bin/libwinpthread-1.dll .
@@ -137,7 +148,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
+        
     - name: Setup workspace
       shell: bash
       working-directory: ${{github.workspace}}
@@ -165,6 +176,15 @@ jobs:
         unzip bass.zip
         cp ./bass.h ./DRO-Client/3rd/include
         cp ./libbass.dylib ./DRO-Client/3rd/x86_64
+      
+    - name: Fetch BassOpus external library
+      shell: bash
+      working-directory: ${{env.parentworkspace}}
+      run: |
+        curl http://www.un4seen.com/files/bassopus24-osx.zip -o bassopus.zip
+        unzip bassopus.zip
+        cp ./bassopus.h ./DRO-Client/3rd/include
+        cp ./libbassopus.dylib ./DRO-Client/3rd/x86_64
         
     - name: Fetch QtApng external library
       shell: bash
@@ -184,7 +204,7 @@ jobs:
       run: |
         ./Qt/5.14.2/clang_64/bin/qmake -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec macx-clang "CONFIG+=x86_64" "CONFIG+=qtquickcompiler"
   
-    - name: Run Make
+    - name: Run make
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
@@ -208,6 +228,8 @@ jobs:
         cp ../discord-rpc/osx-dynamic/lib/libdiscord-rpc.dylib "./Danganronpa Online.app/Contents/MacOS/"
         cp ../libbass.dylib "./Danganronpa Online.app/Contents/Frameworks/"
         cp ../libbass.dylib "./Danganronpa Online.app/Contents/MacOS/"
+        cp ../libbassopus.dylib "./Danganronpa Online.app/Contents/Frameworks/"
+        cp ../libbassopus.dylib "./Danganronpa Online.app/Contents/MacOS/"
         cp -R ../clang_64/plugins/imageformats "./Danganronpa Online.app/Contents/MacOS/"
          
     - name: Make DMG
@@ -232,6 +254,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Update worker
+      shell: bash
+      working-directory: ${{github.workspace}}
+      run: |
+        sudo apt-get update
+        sudo apt-get upgrade
+        
     - name: Setup workspace
       shell: bash
       working-directory: ${{github.workspace}}
@@ -260,11 +289,14 @@ jobs:
         cp ./bass.h ./DRO-Client/3rd/include/bass.h
         cp ./x64/libbass.so ./DRO-Client/3rd/x86_64/libbass.so
         
-    - name: Fetch QtApng external library
+    - name: Fetch BassOpus external library
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        curl -L https://cdn.discordapp.com/attachments/422857337133596692/845396654642954260/libqapng.so -o libqapng.so
+        curl http://www.un4seen.com/files/bassopus24-linux.zip -o bassopus.zip
+        unzip bassopus.zip
+        cp ./bassopus.h ./DRO-Client/3rd/include/bassopus.h
+        cp ./x64/libbassopus.so ./DRO-Client/3rd/x86_64/libbassopus.so
         
     - name: Install Qt
       shell: bash
@@ -275,6 +307,18 @@ jobs:
         sudo apt-get install libqt5designer5
         sudo apt-get install git
         sudo snap install discord
+        
+    - name: Build QtApng external library
+      shell: bash
+      working-directory: ${{env.parentworkspace}}
+      run: |
+        git clone https://github.com/Skycoder42/QtApng
+        cd QtApng
+        qmake
+        make -j2
+        cp plugins/imageformats/libqapng.so ..
+        cd ..
+        rm -r -f QtApng
         
     - name: Run qmake
       shell: bash
@@ -302,6 +346,7 @@ jobs:
         mkdir depends
         cp ../discord-rpc/linux-dynamic/lib/libdiscord-rpc.so "./depends"
         cp ../x64/libbass.so "./depends"
+        cp ../x64/libbassopus.so "./depends"
         mkdir imageformats
         cp -R ../libqapng.so "./imageformats"
         echo "LD_LIBRARY_PATH=.:./depends:$LD_LIBRARY_PATH ./dro-client" > "dro-client.sh"

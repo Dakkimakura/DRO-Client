@@ -52,6 +52,7 @@ public:
   bool has_character_declaration_feature() const;
   bool has_showname_declaration_feature() const;
   bool has_chat_speed_feature() const;
+  bool has_character_availability_request_feature() const;
 
   ///////////////////////////////////////////
 
@@ -71,14 +72,17 @@ public:
   // QString get_demothings_path();
   QString get_sounds_path(QString p_file);
   QString get_music_path(QString p_song);
-  QString get_background_path(QString p_file);
-  QString get_default_background_path(QString p_file);
+  QString format_background_path(QString p_identifier);
+  QStringList get_available_background_identifier_list();
+  QString get_current_background_path();
   QString get_evidence_path(QString p_file);
 
-  QString sanitize_path(QString p_file);
+  bool is_safe_path(QString p_file);
 
   QString find_asset_path(QStringList file_list, QStringList extension_list);
   QString find_asset_path(QStringList file_list);
+  QString find_asset_path(QString p_file, QStringList p_extension_list);
+  QString find_asset_path(QString p_file);
   QString find_theme_asset_path(QString file, QStringList extension_list);
   QString find_theme_asset_path(QString file);
 
@@ -203,7 +207,7 @@ public slots:
   void loading_cancelled();
 
 signals:
-  void reload_theme();
+  void theme_reloaded();
 
 private:
   AOConfig *ao_config = nullptr;
@@ -227,6 +231,7 @@ private:
   bool feature_showname = false;
   bool feature_chrini = false;
   bool feature_chat_speed = false;
+  bool feature_charscheck = false;
 
   ///////////////loading info///////////////////
   // player number, it's hardly used but might be needed for some old servers

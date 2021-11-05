@@ -61,6 +61,7 @@ void AOApplication::_p_handle_server_packet(DRPacket p_packet)
     feature_showname = false;
     feature_chrini = false;
     feature_chat_speed = false;
+    feature_charscheck = false;
 
     send_server_packet(DRPacket("HI", {get_hdid()}));
   }
@@ -90,6 +91,7 @@ void AOApplication::_p_handle_server_packet(DRPacket p_packet)
     feature_showname = l_content.contains("showname", Qt::CaseInsensitive);
     feature_chrini = l_content.contains("chrini", Qt::CaseInsensitive);
     feature_chat_speed = l_content.contains("chat_speed", Qt::CaseInsensitive);
+    feature_charscheck = l_content.contains("charscheck", Qt::CaseInsensitive);
   }
   else if (l_header == "PN")
   {
@@ -118,34 +120,23 @@ void AOApplication::_p_handle_server_packet(DRPacket p_packet)
 
     is_courtroom_loaded = false;
 
-    QString window_title = "Danganronpa Online";
-    int selected_server = m_lobby->get_selected_server();
-
-    QString server_name, server_address;
-    bool is_favorite = false;
-    if (m_lobby->is_public_server())
+    server_type l_current_server = m_lobby->get_selected_server();
+    if (l_current_server.is_favorite)
     {
-      if (selected_server >= 0 && selected_server < m_server_list.size())
+      const QString l_current_server_address = l_current_server.to_address();
+      for (const server_type &i_server : qAsConst(m_server_list))
       {
-        auto info = m_server_list.at(selected_server);
-        server_name = info.name;
-        server_address = info.ip + info.port;
-        window_title += ": " + server_name;
-      }
-    }
-    else
-    {
-      if (selected_server >= 0 && selected_server < m_favorite_server_list.size())
-      {
-        auto info = m_favorite_server_list.at(selected_server);
-        server_name = info.name;
-        server_address = info.ip + info.port;
-        is_favorite = true;
-        window_title += ": " + server_name;
+        if (l_current_server_address != i_server.to_address())
+          continue;
+        l_current_server.name = i_server.name;
+        break;
       }
     }
 
-    m_courtroom->set_window_title(window_title);
+    QString l_window_title = "Danganronpa Online";
+    if (!l_current_server.name.isEmpty())
+      l_window_title = l_window_title + ": " + l_current_server.to_info();
+    m_courtroom->set_window_title(l_window_title);
 
     m_lobby->show_loading_overlay();
     m_lobby->set_loading_text("Loading");
@@ -153,34 +144,18 @@ void AOApplication::_p_handle_server_packet(DRPacket p_packet)
 
     send_server_packet(DRPacket("RC"));
 
-    // look for the server inside the known public list and report it
-    if (is_favorite)
-    {
-      for (server_type &server : m_server_list)
-      {
-        const QString l_address = server.ip + server.port;
-        if (server_address == l_address)
-        {
-          server_name = server.name;
-          break;
-        }
-      }
-    }
     dr_discord->set_state(DRDiscord::State::Connected);
-    dr_discord->set_server_name(server_name);
+    dr_discord->set_server_name(l_current_server.to_info());
   }
   else if (l_header == "CharsCheck")
   {
     if (!is_courtroom_constructed)
       return;
 
-    for (int n_char = 0; n_char < l_content.size(); ++n_char)
-    {
-      if (l_content.at(n_char) == "-1")
-        m_courtroom->set_taken(n_char, true);
-      else
-        m_courtroom->set_taken(n_char, false);
-    }
+    QVector<char_type> l_chr_list = m_courtroom->get_character_list();
+    for (int i = 0; i < l_chr_list.length(); ++i)
+      l_chr_list[i].taken = l_content.at(i) == "-1";
+    m_courtroom->set_character_list(l_chr_list);
   }
   else if (l_header == "SC")
   {
@@ -264,11 +239,23 @@ void AOApplication::_p_handle_server_packet(DRPacket p_packet)
     if (l_content.size() < 1)
       return;
 
-    if (is_courtroom_constructed)
+    if (!is_courtroom_constructed)
+      return;
+
+    DRAreaBackground l_area_bg;
+    l_area_bg.background = l_content.at(0);
+
+    for (int i = 1; i < l_content.size(); ++i)
     {
-      m_courtroom->set_background(l_content.at(0));
-      m_courtroom->set_scene();
+      const QStringList l_tod_data = l_content.at(i).split("|", DR::SkipEmptyParts);
+      if (l_tod_data.size() < 2)
+        continue;
+      l_area_bg.background_tod_map.insert(l_tod_data.at(0), l_tod_data.at(1));
     }
+
+    qDebug() << l_area_bg.background << l_area_bg.background_tod_map;
+
+    m_courtroom->set_background(l_area_bg);
   }
   else if (l_header == "chat_tick_rate")
   {
@@ -376,15 +363,11 @@ void AOApplication::_p_handle_server_packet(DRPacket p_packet)
   {
     if (l_content.length() < 1)
       return;
-    if (ao_config->manual_gamemode_enabled())
-      return;
     ao_config->set_gamemode(l_content.at(0));
   }
   else if (l_header == "TOD")
   {
     if (l_content.length() < 1)
-      return;
-    if (ao_config->manual_timeofday_enabled())
       return;
     ao_config->set_timeofday(l_content.at(0));
   }

@@ -2,6 +2,7 @@
 #define DATATYPES_H
 
 #include <QDateTime>
+#include <QMap>
 
 class DREmote
 {
@@ -15,6 +16,13 @@ public:
   int desk_modifier = -1;
   QString sound_file;
   int sound_delay = 0;
+};
+
+class DRAreaBackground
+{
+public:
+  QString background;
+  QMap<QString, QString> background_tod_map;
 };
 
 class DRChatRecord
@@ -98,6 +106,7 @@ struct server_type
   QString desc;
   QString ip;
   int port;
+  bool is_favorite = false;
 
   QString to_info() const
   {
@@ -109,10 +118,14 @@ struct server_type
     }
     else if (!ip.isEmpty())
     {
-      r_info = ip + ":" + QString::number(port);
+      r_info = to_address();
     }
 
     return r_info;
+  }
+  QString to_address() const
+  {
+    return ip + ":" + QString::number(port);
   }
 };
 

@@ -51,13 +51,16 @@ AOConfigPanel::AOConfigPanel(AOApplication *p_ao_app, QWidget *p_parent)
   // game
   ui_theme = AO_GUI_WIDGET(QComboBox, "theme");
   ui_reload_theme = AO_GUI_WIDGET(QPushButton, "theme_reload");
-  ui_gamemode = AO_GUI_WIDGET(QComboBox, "gamemode");
-  ui_manual_gamemode = AO_GUI_WIDGET(QCheckBox, "manual_gamemode");
-  ui_timeofday = AO_GUI_WIDGET(QComboBox, "timeofday");
-  ui_manual_timeofday = AO_GUI_WIDGET(QCheckBox, "manual_timeofday");
+  ui_gamemode = AO_GUI_WIDGET(QLineEdit, "gamemode");
+  ui_manual_gamemode = AO_GUI_WIDGET(QComboBox, "manual_gamemode");
+  ui_manual_gamemode_selection = AO_GUI_WIDGET(QCheckBox, "manual_gamemode_selection");
+  ui_timeofday = AO_GUI_WIDGET(QLineEdit, "timeofday");
+  ui_manual_timeofday = AO_GUI_WIDGET(QComboBox, "manual_timeofday");
+  ui_manual_timeofday_selection = AO_GUI_WIDGET(QCheckBox, "manual_timeofday_selection");
   ui_showname = AO_GUI_WIDGET(QLineEdit, "showname");
   ui_always_pre = AO_GUI_WIDGET(QCheckBox, "always_pre");
   ui_chat_tick_interval = AO_GUI_WIDGET(QSpinBox, "chat_tick_interval");
+  ui_emote_preview = AO_GUI_WIDGET(QCheckBox, "emote_preview");
 
   // IC Chatlog
   ui_log_max_lines = AO_GUI_WIDGET(QSpinBox, "log_length");
@@ -110,14 +113,19 @@ AOConfigPanel::AOConfigPanel(AOApplication *p_ao_app, QWidget *p_parent)
   // game
   connect(m_config, SIGNAL(theme_changed(QString)), this, SLOT(on_theme_changed(QString)));
   connect(m_config, SIGNAL(gamemode_changed(QString)), this, SLOT(on_gamemode_changed(QString)));
-  connect(m_config, SIGNAL(manual_gamemode_changed(bool)), ui_manual_gamemode, SLOT(setChecked(bool)));
-  connect(m_config, SIGNAL(timeofday_changed(QString)), this, SLOT(on_theme_changed(QString)));
-  connect(m_config, SIGNAL(manual_timeofday_changed(bool)), ui_manual_timeofday, SLOT(setChecked(bool)));
+  connect(m_config, SIGNAL(manual_gamemode_changed(QString)), this, SLOT(on_manual_gamemode_changed(QString)));
+  connect(m_config, SIGNAL(manual_gamemode_selection_changed(bool)), this,
+          SLOT(on_manual_gamemode_selection_changed(bool)));
+  connect(m_config, SIGNAL(timeofday_changed(QString)), this, SLOT(on_timeofday_changed(QString)));
+  connect(m_config, SIGNAL(manual_timeofday_changed(QString)), this, SLOT(on_manual_timeofday_changed(QString)));
+  connect(m_config, SIGNAL(manual_timeofday_selection_changed(bool)), this,
+          SLOT(on_manual_timeofday_selection_changed(bool)));
   connect(m_config, SIGNAL(showname_changed(QString)), ui_showname, SLOT(setText(QString)));
   connect(m_config, SIGNAL(showname_placeholder_changed(QString)), this,
           SLOT(on_showname_placeholder_changed(QString)));
   connect(m_config, SIGNAL(always_pre_changed(bool)), ui_always_pre, SLOT(setChecked(bool)));
   connect(m_config, SIGNAL(chat_tick_interval_changed(int)), ui_chat_tick_interval, SLOT(setValue(int)));
+  connect(m_config, SIGNAL(emote_preview_changed(bool)), ui_emote_preview, SLOT(setChecked(bool)));
 
   // log
   connect(m_config, SIGNAL(log_max_lines_changed(int)), ui_log_max_lines, SLOT(setValue(int)));
@@ -154,7 +162,6 @@ AOConfigPanel::AOConfigPanel(AOApplication *p_ao_app, QWidget *p_parent)
   connect(m_engine, SIGNAL(favorite_device_changed(DRAudioDevice)), this,
           SLOT(on_favorite_audio_device_changed(DRAudioDevice)));
 
-  // output
   // meta
   connect(ui_close, SIGNAL(clicked()), this, SLOT(close()));
   connect(ui_save, SIGNAL(clicked()), m_config, SLOT(save_file()));
@@ -171,13 +178,18 @@ AOConfigPanel::AOConfigPanel(AOApplication *p_ao_app, QWidget *p_parent)
   // game
   connect(ui_theme, SIGNAL(currentIndexChanged(QString)), m_config, SLOT(set_theme(QString)));
   connect(ui_reload_theme, SIGNAL(clicked()), this, SLOT(on_reload_theme_clicked()));
-  connect(ui_gamemode, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_gamemode_index_changed(QString)));
-  connect(ui_manual_gamemode, SIGNAL(toggled(bool)), m_config, SLOT(set_manual_gamemode(bool)));
-  connect(ui_timeofday, SIGNAL(currentIndexChanged(QString)), this, SLOT(on_timeofday_index_changed(QString)));
-  connect(ui_manual_timeofday, SIGNAL(toggled(bool)), m_config, SLOT(set_manual_timeofday(bool)));
+  connect(ui_manual_gamemode, SIGNAL(currentIndexChanged(QString)), this,
+          SLOT(on_manual_gamemode_index_changed(QString)));
+  connect(ui_manual_gamemode_selection, SIGNAL(toggled(bool)), m_config,
+          SLOT(set_manual_gamemode_selection_enabled(bool)));
+  connect(ui_manual_timeofday, SIGNAL(currentIndexChanged(QString)), this,
+          SLOT(on_manual_timeofday_index_changed(QString)));
+  connect(ui_manual_timeofday_selection, SIGNAL(toggled(bool)), m_config,
+          SLOT(set_manual_timeofday_selection_enabled(bool)));
   connect(ui_showname, SIGNAL(editingFinished()), this, SLOT(showname_editing_finished()));
   connect(ui_always_pre, SIGNAL(toggled(bool)), m_config, SLOT(set_always_pre(bool)));
   connect(ui_chat_tick_interval, SIGNAL(valueChanged(int)), m_config, SLOT(set_chat_tick_interval(int)));
+  connect(ui_emote_preview, SIGNAL(toggled(bool)), m_config, SLOT(set_emote_preview(bool)));
 
   // out, log
   connect(ui_log_max_lines, SIGNAL(valueChanged(int)), m_config, SLOT(set_log_max_lines(int)));
@@ -217,14 +229,15 @@ AOConfigPanel::AOConfigPanel(AOApplication *p_ao_app, QWidget *p_parent)
 
   // game
   ui_theme->setCurrentText(m_config->theme());
-  ui_gamemode->setCurrentText(m_config->gamemode());
-  ui_manual_gamemode->setChecked(m_config->manual_gamemode_enabled());
-  ui_timeofday->setCurrentText(m_config->timeofday());
-  ui_manual_timeofday->setChecked(m_config->manual_timeofday_enabled());
+  ui_manual_gamemode->setCurrentText(m_config->manual_gamemode());
+  ui_manual_gamemode_selection->setChecked(m_config->is_manual_gamemode_selection_enabled());
+  ui_manual_timeofday->setCurrentText(m_config->manual_timeofday());
+  ui_manual_timeofday_selection->setChecked(m_config->is_manual_timeofday_selection_enabled());
   ui_showname->setText(m_config->showname());
   on_showname_placeholder_changed(m_config->showname_placeholder());
   ui_always_pre->setChecked(m_config->always_pre_enabled());
   ui_chat_tick_interval->setValue(m_config->chat_tick_interval());
+  ui_emote_preview->setChecked(m_config->emote_preview_enabled());
 
   // log
   ui_log_max_lines->setValue(m_config->log_max_lines());
@@ -263,13 +276,8 @@ AOConfigPanel::AOConfigPanel(AOApplication *p_ao_app, QWidget *p_parent)
   ui_blip_rate->setValue(m_config->blip_rate());
   ui_blank_blips->setChecked(m_config->blank_blips_enabled());
 
-  // Widget enabling connections
-  ui_gamemode->setEnabled(m_config->manual_gamemode_enabled());
-  ui_timeofday->setEnabled(m_config->manual_timeofday_enabled());
-  // The manual gamemode checkbox enables browsing the gamemode combox
-  // similarly with time of day
-  connect(m_config, SIGNAL(manual_gamemode_changed(bool)), ui_gamemode, SLOT(setEnabled(bool)));
-  connect(m_config, SIGNAL(manual_timeofday_changed(bool)), ui_timeofday, SLOT(setEnabled(bool)));
+  on_manual_gamemode_selection_changed(m_config->is_manual_gamemode_selection_enabled());
+  on_manual_timeofday_selection_changed(m_config->is_manual_timeofday_selection_enabled());
 }
 
 void AOConfigPanel::showEvent(QShowEvent *event)
@@ -278,18 +286,12 @@ void AOConfigPanel::showEvent(QShowEvent *event)
 
   if (isVisible())
   {
-    // refresh theme, gamemode and time of day comboboxes
     refresh_theme_list();
-    refresh_gamemode_list();
-    refresh_timeofday_list();
   }
 }
 
 void AOConfigPanel::refresh_theme_list()
 {
-  const QString p_prev_text = ui_theme->currentText();
-
-  // block signals
   ui_theme->blockSignals(true);
   ui_theme->clear();
 
@@ -303,71 +305,62 @@ void AOConfigPanel::refresh_theme_list()
   }
 
   // restore previous selection
-  ui_theme->setCurrentText(p_prev_text);
-
-  // unblock
+  ui_theme->setCurrentText(m_config->theme());
   ui_theme->blockSignals(false);
 }
 
 void AOConfigPanel::refresh_gamemode_list()
 {
-  const QString p_prev_text = ui_gamemode->currentText();
-
-  // block signals
-  ui_gamemode->blockSignals(true);
-  ui_gamemode->clear();
+  ui_manual_gamemode->blockSignals(true);
+  ui_manual_gamemode->clear();
 
   // add empty entry indicating no gamemode chosen
-  ui_gamemode->addItem("<default>");
+  ui_manual_gamemode->addItem("<default>");
   // gamemodes
   QString path = DRPather::get_application_path() + "/base/themes/" + m_config->theme() + "/gamemodes/";
   for (const QString &i_folder : QDir(ao_app->get_case_sensitive_path(path)).entryList(QDir::Dirs))
   {
     if (i_folder == "." || i_folder == "..")
       continue;
-    ui_gamemode->addItem(i_folder, i_folder);
+    ui_manual_gamemode->addItem(i_folder, i_folder);
   }
 
-  // restore previous selection
-  ui_gamemode->setCurrentText(p_prev_text);
-
-  // unblock
-  ui_gamemode->blockSignals(false);
+  ui_manual_gamemode->setCurrentText(m_config->manual_gamemode());
+  ui_manual_gamemode->blockSignals(false);
 }
 
 void AOConfigPanel::refresh_timeofday_list()
 {
-  const QString p_prev_text = ui_timeofday->currentText();
-
-  // block signals
-  ui_timeofday->blockSignals(true);
-  ui_timeofday->clear();
+  ui_manual_timeofday->blockSignals(true);
+  ui_manual_timeofday->clear();
 
   // add empty entry indicating no time of day chosen
-  ui_timeofday->addItem("<default>");
+  ui_manual_timeofday->addItem("<default>");
+
+  const QString l_theme = m_config->theme();
+  const QString l_gamemode =
+      m_config->is_manual_gamemode_selection_enabled() ? m_config->manual_gamemode() : m_config->gamemode();
 
   // decide path to look for times of day. This differs whether there is a
   // gamemode chosen or not
-  QString path;
-  if (m_config->gamemode().isEmpty())
-    path = DRPather::get_application_path() + "/base/themes/" + m_config->theme() + "/times/";
+  QString l_timeofday_path;
+
+  if (l_gamemode.isEmpty())
+    l_timeofday_path = DRPather::get_application_path() + "/base/themes/" + l_theme + "/times/";
   else
-    path = DRPather::get_application_path() + "/base/themes/" + m_config->theme() + "/gamemodes/" +
-           m_config->gamemode() + "/times/";
+    l_timeofday_path =
+        DRPather::get_application_path() + "/base/themes/" + l_theme + "/gamemodes/" + l_gamemode + "/times/";
 
   // times of day
-  for (const QString &i_folder : QDir(ao_app->get_case_sensitive_path(path)).entryList(QDir::Dirs))
+  for (const QString &i_folder : QDir(ao_app->get_case_sensitive_path(l_timeofday_path)).entryList(QDir::Dirs))
   {
     if (i_folder == "." || i_folder == "..")
       continue;
-    ui_timeofday->addItem(i_folder, i_folder);
+    ui_manual_timeofday->addItem(i_folder, i_folder);
   }
 
-  // restore previous selection
-  ui_timeofday->setCurrentText(p_prev_text);
-
-  // unblock
-  ui_timeofday->blockSignals(false);
+  ui_manual_timeofday->setCurrentText(m_config->manual_timeofday());
+  ui_manual_timeofday->blockSignals(false);
 }
 
 void AOConfigPanel::update_audio_device_list()
@@ -411,38 +404,62 @@ void AOConfigPanel::on_reload_theme_clicked()
 
 void AOConfigPanel::on_theme_changed(QString p_name)
 {
+  Q_UNUSED(p_name);
   refresh_theme_list();
   refresh_gamemode_list();
   refresh_timeofday_list();
-  ui_theme->setCurrentText(p_name);
 }
 
-void AOConfigPanel::on_gamemode_changed(QString p_name)
+void AOConfigPanel::on_gamemode_changed(QString p_text)
 {
-  refresh_theme_list();
-  refresh_gamemode_list();
-  refresh_timeofday_list();
-  ui_gamemode->setCurrentText(p_name);
+  ui_gamemode->setText(p_text.isEmpty() ? "<default>" : p_text);
 }
 
-void AOConfigPanel::on_timeofday_changed(QString p_name)
+void AOConfigPanel::on_manual_gamemode_selection_changed(bool p_enabled)
 {
-  refresh_theme_list();
+  ui_gamemode->setHidden(p_enabled);
+  ui_manual_gamemode->setVisible(p_enabled);
+  ui_manual_gamemode_selection->setChecked(p_enabled);
   refresh_gamemode_list();
   refresh_timeofday_list();
-  ui_timeofday->setCurrentText(p_name);
 }
 
-void AOConfigPanel::on_gamemode_index_changed(QString p_text)
+void AOConfigPanel::on_manual_gamemode_changed(QString p_name)
+{
+  Q_UNUSED(p_name);
+  refresh_gamemode_list();
+  refresh_timeofday_list();
+}
+
+void AOConfigPanel::on_manual_gamemode_index_changed(QString p_text)
 {
   Q_UNUSED(p_text);
-  m_config->set_gamemode(ui_gamemode->currentData().toString());
+  m_config->set_manual_gamemode(ui_manual_gamemode->currentData().toString());
 }
 
-void AOConfigPanel::on_timeofday_index_changed(QString p_text)
+void AOConfigPanel::on_timeofday_changed(QString p_text)
+{
+  ui_timeofday->setText(p_text.isEmpty() ? "<default>" : p_text);
+}
+
+void AOConfigPanel::on_manual_timeofday_selection_changed(bool p_enabled)
+{
+  ui_timeofday->setHidden(p_enabled);
+  ui_manual_timeofday->setVisible(p_enabled);
+  ui_manual_timeofday_selection->setChecked(p_enabled);
+  refresh_timeofday_list();
+}
+
+void AOConfigPanel::on_manual_timeofday_changed(QString p_name)
+{
+  Q_UNUSED(p_name);
+  refresh_timeofday_list();
+}
+
+void AOConfigPanel::on_manual_timeofday_index_changed(QString p_text)
 {
   Q_UNUSED(p_text);
-  m_config->set_timeofday(ui_timeofday->currentData().toString());
+  m_config->set_manual_timeofday(ui_manual_timeofday->currentData().toString());
 }
 
 void AOConfigPanel::on_showname_placeholder_changed(QString p_text)
