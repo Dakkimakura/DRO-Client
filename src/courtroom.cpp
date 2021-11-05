@@ -1038,7 +1038,7 @@ void Courtroom::load_ic_text_format()
     if (const std::optional<QColor> l_color =
             ao_app->maybe_color(QString("ic_chatlog_%1_color").arg(f_identifier), COURTROOM_FONTS_INI);
         l_color.has_value())
-      f_format.setForeground(l_color.value());
+      f_format.setForeground(l_color.value_or(QColor()));
 
     if (ao_app->get_font_property(QString("ic_chatlog_%1_bold").arg(f_identifier), COURTROOM_FONTS_INI))
       f_format.setFontWeight(QFont::Bold);
@@ -1299,7 +1299,7 @@ void Courtroom::calculate_chat_tick_interval()
 {
   double l_tick_rate = ao_config->chat_tick_interval();
   if (m_server_tick_rate.has_value())
-    l_tick_rate = qMax(m_server_tick_rate.value(), 0);
+    l_tick_rate = qMax(m_server_tick_rate.value_or(0), 0);
   l_tick_rate = qBound(0.0, l_tick_rate * (1.0 - qBound(-1.0, 0.4 * m_tick_speed, 1.0)), l_tick_rate * 2.0);
   m_tick_timer->setInterval(l_tick_rate);
 }

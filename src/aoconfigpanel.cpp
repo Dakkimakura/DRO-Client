@@ -387,10 +387,10 @@ void AOConfigPanel::update_audio_device_list()
       ui_device->addItem(i_device.get_name(), i_device.get_driver());
       int item_index = ui_device->count() - 1;
 
-      if (current_device.has_value() && current_device.value().get_driver() == i_device.get_driver())
+      if (current_device.has_value() && current_device.value_or(nullptr).get_driver() == i_device.get_driver())
         current_device_index = item_index;
 
-      if (favorite_device.has_value() && favorite_device.value().get_driver() == i_device.get_driver())
+      if (favorite_device.has_value() && favorite_device.value_or(DRAudioDevice()).get_driver() == i_device.get_driver())
         ui_device->setItemData(item_index, QColor(Qt::green), Qt::BackgroundRole);
     }
 
@@ -401,7 +401,7 @@ void AOConfigPanel::update_audio_device_list()
   }
 
   if (current_device_index.has_value())
-    ui_device->setCurrentIndex(current_device_index.value());
+    ui_device->setCurrentIndex(current_device_index.value_or(nullptr));
 }
 
 void AOConfigPanel::on_reload_theme_clicked()
