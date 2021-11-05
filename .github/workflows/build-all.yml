@@ -196,13 +196,13 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: '5.14.2'
+        version: '5.12.9'
 
     - name: Run qmake
       shell: bash
       working-directory: ${{env.parentworkspace}}
       run: |
-        ./Qt/5.14.2/clang_64/bin/qmake -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec macx-clang "CONFIG+=x86_64" "CONFIG+=qtquickcompiler"
+        ./Qt/5.12.9/clang_64/bin/qmake -makefile -o Makefile ./DRO-Client/dronline-client.pro -spec macx-clang "CONFIG+=x86_64" "CONFIG+=qtquickcompiler"
   
     - name: Run make
       shell: bash
@@ -223,7 +223,7 @@ jobs:
       working-directory: "${{env.parentworkspace}}/Danganronpa Online"
       shell: bash
       run: |
-        ../Qt/5.14.2/clang_64/bin/macdeployqt "Danganronpa Online.app"
+        ../Qt/5.12.9/clang_64/bin/macdeployqt "Danganronpa Online.app"
         cp ../discord-rpc/osx-dynamic/lib/libdiscord-rpc.dylib "./Danganronpa Online.app/Contents/Frameworks/"
         cp ../discord-rpc/osx-dynamic/lib/libdiscord-rpc.dylib "./Danganronpa Online.app/Contents/MacOS/"
         cp ../libbass.dylib "./Danganronpa Online.app/Contents/Frameworks/"
